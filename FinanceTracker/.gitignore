@@ -1,29 +1,53 @@
-# Binaries for programs and plugins
+# Binaries
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+/finance-tracker      # бинарник с именем проекта, если собираешь без флага -o
+/bin/
+/dist/
 
 # Test binary, built with `go test -c`
 *.test
 
-# Code coverage profiles and other test artifacts
+# Output of the go coverage tool
 *.out
-coverage.*
-*.coverprofile
-profile.cov
+coverage.html
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
+# Dependency directories (remove if you vendor dependencies)
+vendor/
 
-# Go workspace file
+# IDE - GoLand / IntelliJ IDEA
+.idea/
+
+# IDE - VS Code
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Go workspace file (new in Go 1.18+)
 go.work
 go.work.sum
 
-# env file
+# Environment and configuration (contain secrets)
 .env
+.env.*
+!.env.example
 
-# Editor/IDE
-# .idea/
-# .vscode/
+# Docker
+docker-compose.override.yml
+
+# Local development database
+*.db
+*.sqlite
