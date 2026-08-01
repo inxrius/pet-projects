@@ -49,3 +49,13 @@ func (r *TransactionRepository) GetAllByUser(_ context.Context, userID int) ([]d
     }
     return result, nil
 }
+
+func (r *TransactionRepository) GetAll(_ context.Context) ([]domain.Transaction, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	var result []domain.Transaction
+	for _, tx := range r.transactions {
+		result = append(result, *tx)
+	}
+	return result, nil
+}
