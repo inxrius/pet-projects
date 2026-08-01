@@ -7,8 +7,8 @@ import (
 )
 
 type UserRepository struct {
-    mu    sync.RWMutex
-    users map[int]*domain.User
+    mu     sync.RWMutex
+    users  map[int]*domain.User
     nextID int
 }
 

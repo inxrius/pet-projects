@@ -7,9 +7,9 @@ import (
 )
 
 type CategoryRepository struct {
-    mu       sync.RWMutex
+    mu         sync.RWMutex
     categories map[int]*domain.Category
-    nextID   int
+    nextID     int
 }
 
 func NewCategoryRepository() *CategoryRepository {
