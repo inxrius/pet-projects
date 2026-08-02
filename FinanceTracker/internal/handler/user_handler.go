@@ -1,73 +1,114 @@
 package handler
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/http"
+    "encoding/json"
+    "errors"
+    "fmt"
+    "net/http"
+    "strconv"
 
-	"github.com/inxrius/FinanceTracker/internal/service"
+    "github.com/go-chi/chi/v5"
+    "github.com/inxrius/FinanceTracker/internal/domain"
+    "github.com/inxrius/FinanceTracker/internal/service"
 )
 
-type CreateUserRequest struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-}
-
 type UserHandler struct {
-	userService *service.UserService
+    userService *service.UserService
 }
 
 func NewUserHandler(userService *service.UserService) *UserHandler {
-	return &UserHandler{userService}
+    return &UserHandler{userService: userService}
 }
 
-func (h UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
+type CreateUserRequest struct {
+    Name  string `json:"name"`
+    Email string `json:"email"`
+}
 
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+type UserResponse struct {
+    ID    int    `json:"id"`
+    Name  string `json:"name"`
+    Email string `json:"email"`
+}
 
-	contentType := r.Header.Get("Content-Type")
-	if contentType != "application/json" {
-		http.Error(w, "Content-Type must be application/json", http.StatusUnsupportedMediaType)
-		return
-	}
+func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
+    defer r.Body.Close()
 
-	// Создаём переменную для данных
-	var user CreateUserRequest
+    var req CreateUserRequest
+    decoder := json.NewDecoder(r.Body)
+    decoder.DisallowUnknownFields()
 
-	// Создаём декодер и включаем строгий режим
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields() // Ошибка, если в JSON есть лишние поля
+    if err := decoder.Decode(&req); err != nil {
+        var syntaxError *json.SyntaxError
+        if errors.As(err, &syntaxError) {
+            http.Error(w, fmt.Sprintf("Invalid JSON (at position %d)", syntaxError.Offset), http.StatusBadRequest)
+        } else {
+            http.Error(w, err.Error(), http.StatusBadRequest)
+        }
+        return
+    }
 
-	// Декодируем JSON в структуру
-	err := decoder.Decode(&user)
-	if err != nil {
-		// Детальная обработка ошибок
-		var syntaxError *json.SyntaxError
-		if errors.As(err, &syntaxError) {
-			http.Error(w, fmt.Sprintf("Invalid JSON: %s (at position %d)", err.Error(), syntaxError.Offset), http.StatusBadRequest)
-		} else {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-		}
-		return
-	}
+    user, err := h.userService.Register(r.Context(), req.Name, req.Email)
+    if err != nil {
+        if errors.Is(err, domain.ErrInvalidInput) {
+            http.Error(w, err.Error(), http.StatusBadRequest)
+            return
+        }
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 
-	// Дополнительная валидация полей
-	if user.Name == "" {
-		http.Error(w, "Name is required", http.StatusBadRequest)
-		return
-	}
-	if user.Email == "" {
-		http.Error(w, "Email is required", http.StatusBadRequest)
-		return
-	}
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusCreated)
+    json.NewEncoder(w).Encode(UserResponse{
+        ID:    user.ID,
+        Name:  user.Name,
+        Email: user.Email,
+    })
+}
 
-	// Здесь можно хешировать пароль или сохранять пользователя в базу
+func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
+    idStr := chi.URLParam(r, "id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        http.Error(w, "invalid user ID", http.StatusBadRequest)
+        return
+    }
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(user)
+    user, err := h.userService.GetUser(r.Context(), id)
+    if err != nil {
+        if errors.Is(err, domain.ErrUserNotFound) {
+            http.Error(w, err.Error(), http.StatusNotFound)
+            return
+        }
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(UserResponse{
+        ID:    user.ID,
+        Name:  user.Name,
+        Email: user.Email,
+    })
+}
+
+func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
+    users, err := h.userService.GetAllUsers(r.Context())
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    response := make([]UserResponse, len(users))
+    for i, u := range users {
+        response[i] = UserResponse{
+            ID:    u.ID,
+            Name:  u.Name,
+            Email: u.Email,
+        }
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(response)
 }
