@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM - Добавление лида</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Добавление лида в CRM</h1>
+        
+        <form id="leadForm">
+            <div class="form-group">
+                <label for="clientName">Имя клиента *</label>
+                <input type="text" id="clientName" name="clientName" required>
+                <span class="error" id="nameError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Номер телефона *</label>
+                <input type="tel" id="phone" name="phone" required>
+                <span class="error" id="phoneError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="leadSource">Источник лида</label>
+                <select id="leadSource" name="leadSource">
+                    <option value="cold">Холодный</option>
+                    <option value="warm">Тёплый</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="responsible">Ответственный</label>
+                <select id="responsible" name="responsible">
+                    <option value="lidorub">Лидоруб</option>
+                    <option value="mop">МОП</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="dealStage">Этап сделки</label>
+                <select id="dealStage" name="dealStage">
+                    <option value="new">Новый лид</option>
+                    <option value="qualified">Квалифицирован</option>
+                    <option value="consultation">Назначена консультация</option>
+                    <option value="rejection">Отказ</option>
+                </select>
+            </div>
+
+            <div class="form-group checkbox-group">
+                <label>
+                    <input type="checkbox" id="techSpec" name="techSpec">
+                    <span>Запрошено ТЗ</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn-submit">Сохранить</button>
+        </form>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <div class="leads-section">
+            <h2>Сохранённые лиды</h2>
+            <div id="leadsList"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
