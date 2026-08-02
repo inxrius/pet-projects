@@ -1,5 +1,3 @@
-<!--
-
 # 💰 Finance Tracker API
 
 Серверное приложение для учёта личных доходов и расходов.
@@ -21,5 +19,3 @@
 | Хранилище        | In‑memory (готово к замене на PostgreSQL)           |
 | Контейнеризация  | Docker, Docker Compose                              |
 | Линтер           | [golangci-lint](https://golangci-lint.run/)         |
-
--->
