@@ -89,7 +89,7 @@
 
 Если из требования нельзя однозначно определить ожидаемое поведение приложения, тест помечается как:
 
-`Требует уточнения`
+> Требует уточнения
 
 При этом модель должна указать, какое именно поведение необходимо уточнить.
 
@@ -342,7 +342,7 @@ flowchart TD
 
 Особое внимание уделено фразе:
 
-`NEVER change any additional cells.`
+> EVER change any additional cells.
 
 Агент должен изменять только клетки, полученные после преобразования хода противника.
 
@@ -364,7 +364,7 @@ flowchart TD
 
 Дополнительно в промпте указано, что состояние поля является источником истины:
 
-`The board state is authoritative.`
+> The board state is authoritative.
 
 Это позволяет избежать зависимости от предыдущих текстовых сообщений агента.
 
@@ -392,11 +392,11 @@ text
 
 В системный промпт добавлена инструкция на случай сообщений:
 
-`[System error: was unable to find the new board in the reply ...]`
+> [System error: was unable to find the new board in the reply ...]
 
 или
 
-`[System error: the provided move is invalid.]`
+> [System error: the provided move is invalid.]
 
 В случае ошибки агент должен заново проанализировать текущее состояние поля и сформировать корректный ответ.
 
