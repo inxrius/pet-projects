@@ -1,8 +1,8 @@
 import sys
-import ollama
+from mistralai import Mistral
 
 def read_file(filename: str) -> str:
-    """Читает содержимое файла и возвращает строку."""
+    """Читает содержимое файла и возвращает строку без лишних пробелов по краям."""
     try:
         with open(filename, 'r', encoding='utf-8') as f:
             return f.read().strip()
@@ -14,46 +14,53 @@ def read_file(filename: str) -> str:
         sys.exit(1)
 
 def main():
-    # Пути к файлам
+    # Пути к файлам (при необходимости измените)
+    api_key_file = "api_key.txt"
     prompt_file = "prompt.txt"
     output_file = "response.txt"
 
-    # Читаем промпт
+    # 1. Читаем API-ключ
+    api_key = read_file(api_key_file)
+    if not api_key:
+        print("Ошибка: файл с API-ключом пуст.")
+        sys.exit(1)
+
+    # 2. Читаем промпт
     prompt = read_file(prompt_file)
     if not prompt:
         print("Ошибка: файл с промптом пуст.")
         sys.exit(1)
 
-    # Модель, которую используем (замените при необходимости)
-    model = "mistral"  # или "mistral-small:24b-instruct-2503"
+    # 3. Инициализируем клиент Mistral
+    client = Mistral(api_key=api_key)
 
-    # Сообщения для модели
+    # Модель (можно заменить, например, на "open-mistral-nemo" для бесплатного тарифа)
+    model = "mistral-small-latest"
+
     messages = [
         {"role": "user", "content": prompt}
     ]
 
     try:
-        # Отправляем запрос в Ollama
-        response = ollama.chat(
+        # Отправляем запрос
+        response = client.chat.complete(
             model=model,
             messages=messages,
-            options={
-                "temperature": 0.7,
-                "num_predict": 1000  # аналог max_tokens
-            }
+            temperature=0.7,
+            max_tokens=1000
         )
 
-        # Извлекаем ответ
-        answer = response["message"]["content"]
+        # Извлекаем текст ответа
+        answer = response.choices[0].message.content
 
-        # Записываем ответ в файл
+        # 3. Записываем ответ в файл
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(answer)
 
         print(f"Ответ успешно записан в файл '{output_file}'.")
 
     except Exception as e:
-        print(f"Произошла ошибка при обращении к Ollama: {e}")
+        print(f"Произошла ошибка при обращении к API: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
